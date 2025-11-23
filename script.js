@@ -23,7 +23,7 @@ async function predecir() {
     let entrada = [edad, sexo, peso, presion, colesterol];
     let entradaEscalada = escalar(entrada);
 
-    const tensor = tf.tensor2d([entradaEscalada]);
+    const tensor = tf.tensor2d([[entradaEscalada]]);
 
     let pred = await modelo.predict(tensor).data();
     let prob = pred[0];
