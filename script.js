@@ -10,8 +10,9 @@ const scalerStd = [15.844597496978894, 25.26423444219344, 45.398518810684585, 0.
 let logisticParams = null;
 
 // ============================================================
-// MODELO DE RED NEURONAL
+// PESOS DE LA RED NEURONAL
 // ============================================================
+let nnWeights = null;
 let nnModel = null;
 
 // ============================================================
@@ -22,16 +23,19 @@ window.addEventListener('load', async () => {
     document.getElementById('loading').style.display = 'block';
     
     try {
-        // Cargar parámetros de regresión logística
-        const response = await fetch('model/logistic_params.json');
-        logisticParams = await response.json();
+        // 1. Cargar parámetros de regresión logística
+        const logResponse = await fetch('model/logistic_params.json');
+        logisticParams = await logResponse.json();
         console.log("✅ Regresión Logística cargada");
-        console.log("   Coeficientes:", logisticParams.coefficients);
-        console.log("   Intercepto:", logisticParams.intercept);
         
-        // Cargar red neuronal
-        nnModel = await tf.loadLayersModel('model/nn/model.json');
-        console.log("✅ Red Neuronal cargada");
+        // 2. Cargar pesos de la red neuronal
+        const nnResponse = await fetch('model/nn_weights.json');
+        nnWeights = await nnResponse.json();
+        console.log("✅ Pesos de Red Neuronal cargados");
+        
+        // 3. Crear modelo de red neuronal en TensorFlow.js
+        nnModel = crearModeloNN(nnWeights);
+        console.log("✅ Red Neuronal construida");
         
         // Habilitar botón de predicción
         document.getElementById('predictBtn').disabled = false;
@@ -42,11 +46,55 @@ window.addEventListener('load', async () => {
         
     } catch (error) {
         console.error("❌ Error cargando modelos:", error);
-        alert("Error al cargar los modelos. Verifica la consola para más detalles.");
+        alert("Error al cargar los modelos. Verifica que los archivos JSON estén en la carpeta 'model'.");
         document.getElementById('loading').innerHTML = 
-            '<p style="color: red;">Error al cargar los modelos. Revisa la consola.</p>';
+            '<p style="color: red;">Error al cargar. Revisa la consola (F12).</p>';
     }
 });
+
+// ============================================================
+// CREAR MODELO DE RED NEURONAL CON PESOS CARGADOS
+// ============================================================
+function crearModeloNN(weights) {
+    // Crear modelo Sequential
+    const model = tf.sequential();
+    
+    // Capa 1: Dense con 8 neuronas, activación ReLU
+    model.add(tf.layers.dense({
+        units: 8,
+        activation: 'relu',
+        inputShape: [5],
+        weights: [
+            tf.tensor2d(weights.hidden1_kernel),  // kernel [5, 8]
+            tf.tensor1d(weights.hidden1_bias)     // bias [8]
+        ]
+    }));
+    
+    // Capa 2: Dense con 4 neuronas, activación ReLU
+    model.add(tf.layers.dense({
+        units: 4,
+        activation: 'relu',
+        weights: [
+            tf.tensor2d(weights.hidden2_kernel),  // kernel [8, 4]
+            tf.tensor1d(weights.hidden2_bias)     // bias [4]
+        ]
+    }));
+    
+    // Capa 3: Dense con 1 neurona, activación Sigmoid
+    model.add(tf.layers.dense({
+        units: 1,
+        activation: 'sigmoid',
+        weights: [
+            tf.tensor2d(weights.output_kernel),   // kernel [4, 1]
+            tf.tensor1d(weights.output_bias)      // bias [1]
+        ]
+    }));
+    
+    console.log("📊 Resumen del modelo creado:");
+    model.summary();
+    
+    return model;
+}
 
 // ============================================================
 // FUNCIÓN DE ESCALADO (StandardScaler)
@@ -186,15 +234,3 @@ async function predecir() {
         alert("Error al realizar la predicción. Revisa la consola.");
     }
 }
-
-// ============================================================
-// FUNCIONES AUXILIARES PARA DEBUGGING
-// ============================================================
-function verificarModelos() {
-    console.log("Estado de modelos:");
-    console.log("- Regresión Logística:", logisticParams ? "✅ Cargada" : "❌ No cargada");
-    console.log("- Red Neuronal:", nnModel ? "✅ Cargada" : "❌ No cargada");
-}
-
-// Exponer función de verificación globalmente para debugging
-window.verificarModelos = verificarModelos;
