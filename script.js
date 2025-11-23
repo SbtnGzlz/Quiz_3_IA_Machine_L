@@ -2,58 +2,88 @@ let modelo = null;
 let scalerMean = [51.96666666666667, 134.84761904761905, 224.21428571428572, 0.5, 0.4857142857142857];   // <-- Cambiar si usas otros valores
 let scalerStd  = [15.844597496978894, 25.26423444219344, 45.398518810684585, 0.5, 0.4997958767010258];     // <-- Cambiar si usas otros valores
 
-// CARGAR MODELO (guardamos la promesa)
+// CARGAR MODELO de forma segura al cargar la página
 async function cargarModelo() {
-    try {
-        modelo = await tf.loadLayersModel('model/nn/model.json');
-        console.log("Modelo cargado OK");
-        // opcional: habilitar botón predicción aquí si estaba deshabilitado
-    } catch (err) {
-        console.error("Error cargando el modelo:", err);
-    }
+  try {
+    console.log("Cargando TF.js model desde: model/nn/model.json ...");
+    modelo = await tf.loadLayersModel('model/nn/model.json');
+    console.log("Modelo cargado OK");
+    // opcional: muestra resumen y habilita botón
+    try { modelo.summary(); } catch(e) {}
+    const btn = document.getElementById('predictBtn');
+    if (btn) btn.disabled = false;
+  } catch (err) {
+    console.error("Error cargando modelo:", err);
+    alert("Error cargando el modelo. Mira la consola para más detalles.");
+  }
 }
-cargarModelo();
 
+// Aseguramos que el cargado pase hasta que el documento esté listo
+window.addEventListener('load', cargarModelo);
+
+// Función de escala (asegúrate de usar valores numéricos)
 function escalar(valores) {
-    // valores: array de números [edad, sexo, peso, presion, colesterol]
-    return valores.map((v,i) => (v - scalerMean[i]) / scalerStd[i]);
+  return valores.map((v, i) => {
+    const num = Number(v);
+    if (!isFinite(num)) return NaN;
+    return (num - Number(scalerMean[i])) / Number(scalerStd[i]);
+  });
 }
 
 async function predecir() {
-    if (!modelo) {
-        alert("El modelo aún no está cargado. Espera unos segundos e intenta de nuevo.");
-        console.error("Intento de predecir sin modelo cargado.");
-        return;
-    }
+  if (!modelo) {
+    alert("El modelo aún no está cargado — espera unos segundos y prueba de nuevo.");
+    console.error("Intento de predecir sin modelo cargado.");
+    return;
+  }
 
-    // lectura de inputs
-    let edad = parseFloat(document.getElementById("edad").value) || 0;
-    let sexo = parseFloat(document.getElementById("sexo").value) || 0;
-    let peso = parseFloat(document.getElementById("peso").value) || 0;
-    let presion = parseFloat(document.getElementById("presion").value) || 0;
-    let colesterol = parseFloat(document.getElementById("colesterol").value) || 0;
+  // Leer inputs (asegúrate que tus inputs tengan estos ids: edad, sexo, peso, presion, colesterol)
+  const ids = ['edad','sexo','peso','presion','colesterol'];
+  const raw = ids.map(id => {
+    const el = document.getElementById(id);
+    const v = el ? el.value : "";
+    return v;
+  });
 
-    // vector de entrada, sin doble corchete
-    let entrada = [edad, sexo, peso, presion, colesterol];
+  console.log("Entrada raw:", raw);
 
-    // aplica escala SI y SOLO SI tus datos en notebook fueron escalados
-    let entradaEscalada = escalar(entrada);
+  // Convertir a número y validar
+  const nums = raw.map(v => {
+    const n = Number(v);
+    return isFinite(n) ? n : NaN;
+  });
 
-    // aquí está la corrección: tensor2d con 1 fila y N columnas -> [entradaEscalada]
-    const tensor = tf.tensor2d([entradaEscalada]);
+  if (nums.some(x => Number.isNaN(x))) {
+    alert("Por favor completa todos los campos con valores numéricos válidos.");
+    console.error("Inputs inválidos:", nums);
+    return;
+  }
 
-    // predicción
-    try {
-        let pred = await modelo.predict(tensor).data();
-        let prob = pred[0];
-        let res = (prob >= 0.5) ? "✔ Sobrevive" : "✖ No Sobrevive";
-        document.getElementById("resultado").innerText =
-            `Resultado: ${res}  (prob: ${prob.toFixed(3)})`;
-    } catch (err) {
-        console.error("Error durante predict():", err);
-        alert("Error al predecir (mira la consola para más detalles).");
-    }
+  // Escalar (si tienes valores reales); si no quieres escalar temporalmente, reemplaza `entradaEscalada = nums`
+  const entradaEscalada = escalar(nums);
+  console.log("Entrada escalada:", entradaEscalada);
 
-    // liberar tensor
+  if (entradaEscalada.some(x => Number.isNaN(x))) {
+    alert("Error: hay NaN en la entrada escalada. Verifica scalerMean/scalerStd y los inputs.");
+    console.error("NaN en entrada escalada:", entradaEscalada);
+    return;
+  }
+
+  // Crear tensor 2D: 1 fila, N columnas
+  const tensor = tf.tensor2d([entradaEscalada]); // forma: [1, 5]
+  console.log("Tensor shape:", tensor.shape);
+
+  try {
+    const out = modelo.predict(tensor);
+    const data = await out.data();
+    const prob = data[0];
+    const res = (prob >= 0.5) ? "✔ Sobrevive" : "✖ No Sobrevive";
+    document.getElementById("resultado").innerText =
+      `Resultado: ${res}  (prob: ${prob.toFixed(3)})`;
+  } catch (err) {
+    console.error("Error durante predict():", err);
+    alert("Error al predecir. Revisa la consola.");
+  } finally {
     tensor.dispose();
+  }
 }
