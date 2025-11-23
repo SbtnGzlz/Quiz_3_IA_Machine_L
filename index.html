@@ -2,34 +2,81 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Predicción de Supervivencia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción de Riesgo Cardiaco</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <h2>Predicción de Supervivencia</h2>
+    <div class="container">
+        <h1>🫀 Predicción de Riesgo Cardiaco</h1>
+        <p class="subtitle">Sistema de predicción usando Regresión Logística y Redes Neuronales</p>
 
-    <div class="form">
-        <label>Edad:</label>
-        <input id="edad" type="number">
+        <div class="form">
+            <div class="input-group">
+                <label>Edad (años):</label>
+                <input id="edad" type="number" min="25" max="80" placeholder="Ej: 45">
+            </div>
 
-        <label>Sexo (0 hombre, 1 mujer):</label>
-        <input id="sexo" type="number" min="0" max="1">
+            <div class="input-group">
+                <label>Presión Arterial (mmHg):</label>
+                <input id="presion" type="number" min="90" max="180" placeholder="Ej: 130">
+            </div>
 
-        <label>Peso (kg):</label>
-        <input id="peso" type="number">
+            <div class="input-group">
+                <label>Colesterol (mg/dL):</label>
+                <input id="colesterol" type="number" min="150" max="300" placeholder="Ej: 200">
+            </div>
 
-        <label>Presión Arterial:</label>
-        <input id="presion" type="number">
+            <div class="input-group">
+                <label>¿Fuma?</label>
+                <select id="fuma">
+                    <option value="0">No</option>
+                    <option value="1">Sí</option>
+                </select>
+            </div>
 
-        <label>Colesterol:</label>
-        <input id="colesterol" type="number">
+            <div class="input-group">
+                <label>¿Hace ejercicio regularmente?</label>
+                <select id="ejercicio">
+                    <option value="0">No</option>
+                    <option value="1">Sí</option>
+                </select>
+            </div>
 
-        <button onclick="predecir()">Predecir</button>
+            <button onclick="predecir()" id="predictBtn" disabled>
+                Calcular Riesgo
+            </button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Cargando modelos...
+        </div>
+
+        <div id="resultados" class="resultados" style="display: none;">
+            <h2>📊 Resultados</h2>
+            
+            <div class="resultado-box">
+                <h3>Regresión Logística</h3>
+                <p id="resultado-logistica"></p>
+            </div>
+
+            <div class="resultado-box">
+                <h3>Red Neuronal</h3>
+                <p id="resultado-rn"></p>
+            </div>
+
+            <div class="consenso">
+                <h3>Diagnóstico Consensuado</h3>
+                <p id="consenso"></p>
+            </div>
+        </div>
     </div>
 
-    <h3 id="resultado"></h3>
+    <footer>
+        <p>Proyecto de IA - Regresión Logística y Redes Neuronales</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
