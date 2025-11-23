@@ -1,0 +1,38 @@
+body {
+    font-family: Arial;
+    padding: 20px;
+    background: #f2f2f2;
+}
+
+h2 {
+    text-align: center;
+}
+
+.form {
+    width: 300px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 6px;
+    margin-top: 3px;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}

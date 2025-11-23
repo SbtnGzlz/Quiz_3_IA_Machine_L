@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Predicción de Supervivencia</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.21.0"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h2>Predicción de Supervivencia</h2>
+
+    <div class="form">
+        <label>Edad:</label>
+        <input id="edad" type="number">
+
+        <label>Sexo (0 hombre, 1 mujer):</label>
+        <input id="sexo" type="number" min="0" max="1">
+
+        <label>Peso (kg):</label>
+        <input id="peso" type="number">
+
+        <label>Presión Arterial:</label>
+        <input id="presion" type="number">
+
+        <label>Colesterol:</label>
+        <input id="colesterol" type="number">
+
+        <button onclick="predecir()">Predecir</button>
+    </div>
+
+    <h3 id="resultado"></h3>
+
+    <script src="script.js"></script>
+</body>
+</html>
