@@ -3,79 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predicción de Riesgo Cardiaco</title>
+    <title>Predicción de Riesgo Cardiaco - IA</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <!-- Fondo animado con círculos -->
+    <div class="background-animation">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+
     <div class="container">
-        <h1>🫀 Predicción de Riesgo Cardiaco</h1>
-        <p class="subtitle">Sistema de predicción usando Regresión Logística y Redes Neuronales</p>
-
-        <div class="form">
-            <div class="input-group">
-                <label>Edad (años):</label>
-                <input id="edad" type="number" min="25" max="80" placeholder="Ej: 45">
+        <!-- Header con logo -->
+        <div class="header">
+            <div class="logo">🫀</div>
+            <h1>Predicción de Riesgo Cardiaco</h1>
+            <p class="subtitle">Sistema Inteligente de Diagnóstico Médico</p>
+            <div class="tech-badges">
+                <span class="badge">Regresión Logística</span>
+                <span class="badge">Redes Neuronales</span>
             </div>
-
-            <div class="input-group">
-                <label>Presión Arterial (mmHg):</label>
-                <input id="presion" type="number" min="90" max="180" placeholder="Ej: 130">
-            </div>
-
-            <div class="input-group">
-                <label>Colesterol (mg/dL):</label>
-                <input id="colesterol" type="number" min="150" max="300" placeholder="Ej: 200">
-            </div>
-
-            <div class="input-group">
-                <label>¿Fuma?</label>
-                <select id="fuma">
-                    <option value="0">No</option>
-                    <option value="1">Sí</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>¿Hace ejercicio regularmente?</label>
-                <select id="ejercicio">
-                    <option value="0">No</option>
-                    <option value="1">Sí</option>
-                </select>
-            </div>
-
-            <button onclick="predecir()" id="predictBtn" disabled>
-                Calcular Riesgo
-            </button>
         </div>
 
-        <div id="loading" class="loading" style="display: none;">
-            Cargando modelos...
-        </div>
-
-        <div id="resultados" class="resultados" style="display: none;">
-            <h2>📊 Resultados</h2>
+        <!-- Formulario de entrada -->
+        <div class="form-container">
+            <h2 class="form-title">📋 Datos del Paciente</h2>
             
-            <div class="resultado-box">
-                <h3>Regresión Logística</h3>
-                <p id="resultado-logistica"></p>
-            </div>
+            <div class="form">
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">👤</span>
+                        Edad (años)
+                    </label>
+                    <input id="edad" type="number" min="25" max="80" placeholder="Ej: 45">
+                    <span class="input-hint">Rango: 25-80 años</span>
+                </div>
 
-            <div class="resultado-box">
-                <h3>Red Neuronal</h3>
-                <p id="resultado-rn"></p>
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">💉</span>
+                        Presión Arterial (mmHg)
+                    </label>
+                    <input id="presion" type="number" min="90" max="180" placeholder="Ej: 130">
+                    <span class="input-hint">Rango: 90-180 mmHg</span>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🩺</span>
+                        Colesterol (mg/dL)
+                    </label>
+                    <input id="colesterol" type="number" min="150" max="300" placeholder="Ej: 200">
+                    <span class="input-hint">Rango: 150-300 mg/dL</span>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🚬</span>
+                        ¿Fuma?
+                    </label>
+                    <select id="fuma">
+                        <option value="0">No</option>
+                        <option value="1">Sí</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span class="label-icon">🏃</span>
+                        ¿Hace ejercicio regularmente?
+                    </label>
+                    <select id="ejercicio">
+                        <option value="0">No</option>
+                        <option value="1">Sí</option>
+                    </select>
+                </div>
+
+                <button onclick="predecir()" id="predictBtn" disabled class="predict-button">
+                    <span class="button-text">Calcular Riesgo</span>
+                    <span class="button-icon">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Cargando modelos de IA...</p>
+        </div>
+
+        <!-- Resultados -->
+        <div id="resultados" class="resultados" style="display: none;">
+            <h2 class="results-title">📊 Resultados del Análisis</h2>
+            
+            <div class="results-grid">
+                <div class="resultado-box modelo-logistica">
+                    <div class="modelo-header">
+                        <span class="modelo-icon">📈</span>
+                        <h3>Regresión Logística</h3>
+                    </div>
+                    <p id="resultado-logistica" class="resultado-content"></p>
+                </div>
+
+                <div class="resultado-box modelo-neuronal">
+                    <div class="modelo-header">
+                        <span class="modelo-icon">🧠</span>
+                        <h3>Red Neuronal</h3>
+                    </div>
+                    <p id="resultado-rn" class="resultado-content"></p>
+                </div>
             </div>
 
             <div class="consenso">
+                <div class="consenso-icon">⚕️</div>
                 <h3>Diagnóstico Consensuado</h3>
-                <p id="consenso"></p>
+                <p id="consenso" class="consenso-resultado"></p>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
     <footer>
-        <p>Proyecto de IA - Regresión Logística y Redes Neuronales</p>
+        <div class="footer-content">
+            <div class="university-info">
+                <h3>Politécnico Jaime Isaza Cadavid</h3>
+                <p class="year">2025</p>
+            </div>
+            <div class="authors-info">
+                <p class="authors-label">Autores:</p>
+                <p class="authors-names">Sebastian Gonzalez G. • Emanuel Vanegas C.</p>
+            </div>
+            <div class="project-info">
+                <p>Proyecto de Inteligencia Artificial</p>
+                <p class="tech-stack">TensorFlow.js • Python • Scikit-learn</p>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
